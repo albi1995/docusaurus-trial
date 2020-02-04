@@ -1,0 +1,50 @@
+const disabled = (state = true, action) => {
+  return action.type === "TOGGLE" ? !state : state;
+};
+
+class Button extends React.Component {
+  render() {
+    const { props } = this;
+    console.log("rendering", props.value);
+    return (
+      <div>
+        <input
+          type="checkbox"
+          onClick={() => {
+            props.toggle().then(() => {
+              console.log("This will be called after re-render");
+              this.ref.focus();
+            });
+            console.log("This will be called before re-render");
+          }}
+        />
+        <input
+          disabled={props.disabled}
+          ref={ref => {
+            this.ref = ref;
+          }}
+        />
+      </div>
+    );
+  }
+}
+
+const toggle = () => ({
+  type: "TOGGLE"
+});
+
+const A = connect(
+  state => ({ disabled: state }),
+  dispatch => ({
+    toggle: () => {
+      dispatch(toggle());
+      return Promise.resolve();
+    }
+  })
+)(Button);
+
+const App = () => (
+  <Provider store={createStore(disabled, applyMiddleware(thunk))}>
+    <A />
+  </Provider>
+);
